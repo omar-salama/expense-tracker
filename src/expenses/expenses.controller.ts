@@ -7,43 +7,53 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  HttpCode,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiParam,
+  ApiExtraModels,
+} from '@nestjs/swagger';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './expense.entity';
 import { ExpensesService } from './expenses.service';
+import { ApiMessage } from '../common/decorators/api-message.decorator';
+import { ApiResponseDto } from '../common/api-response.dto';
+import { ApiResponseWithData } from '../common/decorators/api-response-with-data.decorator';
 
+@ApiExtraModels(ApiResponseDto, Expense)
 @Controller('expenses')
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Post()
-  @ApiResponse({ status: 201, type: Expense })
+  @ApiMessage('Expense created successfully')
+  @ApiResponseWithData(Expense, 201)
   @ApiBody({ type: CreateExpenseDto })
-  create(@Body() createExpenseDto: CreateExpenseDto): Promise<Expense> {
+  async create(@Body() createExpenseDto: CreateExpenseDto): Promise<Expense> {
     return this.expensesService.create(createExpenseDto);
   }
 
   @Get()
-  @ApiResponse({
-    status: 200,
-    type: [Expense],
-  })
+  @ApiMessage('Expenses fetched successfully')
+  @ApiResponseWithData([Expense], 200)
   findAll(): Promise<Expense[]> {
     return this.expensesService.findAll();
   }
 
   @Get(':id')
+  @ApiMessage('Expense fetched successfully')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({ status: 200, type: Expense })
+  @ApiResponseWithData(Expense, 200)
   findOne(@Param('id', ParseIntPipe) id: number): Promise<Expense> {
     return this.expensesService.findOne(id);
   }
 
   @Put(':id')
+  @ApiMessage('Expense updated successfully')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({ status: 200, type: Expense })
+  @ApiResponseWithData(Expense, 200)
   @ApiBody({ type: UpdateExpenseDto })
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -53,9 +63,14 @@ export class ExpensesController {
   }
 
   @Delete(':id')
+  @ApiMessage('Expense deleted successfully')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({ status: 204 })
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.expensesService.remove(id);
+  @ApiResponseWithData(Expense, 200)
+  @HttpCode(200)
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string }> {
+    await this.expensesService.remove(id);
+    return { message: 'Expense deleted successfully' };
   }
 }

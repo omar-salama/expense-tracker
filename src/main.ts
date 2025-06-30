@@ -1,12 +1,16 @@
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { ResponseFormatInterceptor } from './common/response-format.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+
+  const reflector = app.get(Reflector);
+  app.useGlobalInterceptors(new ResponseFormatInterceptor(reflector));
 
   const config = new DocumentBuilder()
     .setTitle('Expense Tracker API')
