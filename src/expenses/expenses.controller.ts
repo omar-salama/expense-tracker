@@ -19,7 +19,7 @@ export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Post()
-  @ApiResponse({ status: 201, description: 'Expense created', type: Expense })
+  @ApiResponse({ status: 201, type: Expense })
   @ApiBody({ type: CreateExpenseDto })
   create(@Body() createExpenseDto: CreateExpenseDto): Promise<Expense> {
     return this.expensesService.create(createExpenseDto);
@@ -36,14 +36,14 @@ export class ExpensesController {
 
   @Get(':id')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({ status: 200, description: 'Expense found', type: Expense })
+  @ApiResponse({ status: 200, type: Expense })
   findOne(@Param('id', ParseIntPipe) id: number): Promise<Expense> {
     return this.expensesService.findOne(id);
   }
 
   @Put(':id')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({ status: 200, description: 'Expense updated', type: Expense })
+  @ApiResponse({ status: 200, type: Expense })
   @ApiBody({ type: UpdateExpenseDto })
   update(
     @Param('id', ParseIntPipe) id: number,
