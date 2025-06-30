@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { ExpenseCategory } from '../enums/expense-category.enum';
+import { ExpenseCategory } from './enums/expense-category.enum';
 
 @Entity({ name: 'expenses' })
 export class Expense {

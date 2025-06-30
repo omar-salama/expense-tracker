@@ -5,7 +5,7 @@ import {
   IsInt,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ExpenseCategory } from '../../enums/expense-category.enum';
+import { ExpenseCategory } from '../enums/expense-category.enum';
 import { IsYYYYMMDD } from '../decorators/is-yyyymmdd.decorator';
 
 export class CreateExpenseDto {
