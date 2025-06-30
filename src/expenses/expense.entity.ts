@@ -15,8 +15,8 @@ export class Expense {
   @Column({ type: 'enum', enum: ExpenseCategory })
   category: ExpenseCategory;
 
-  @Column({ type: 'timestamp' })
-  date: Date;
+  @Column({ type: 'date' })
+  date: string;
 
   @Column()
   userId: number;

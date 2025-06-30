@@ -2,11 +2,11 @@ import {
   IsString,
   IsNumber,
   IsEnum,
-  IsDateString,
   IsInt,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ExpenseCategory } from '../../enums/expense-category.enum';
+import { IsYYYYMMDD } from '../decorators/is-yyyymmdd.decorator';
 
 export class CreateExpenseDto {
   @ApiProperty({ example: 'Lunch' })
@@ -22,7 +22,7 @@ export class CreateExpenseDto {
   category: ExpenseCategory;
 
   @ApiProperty({ example: '2025-06-30' })
-  @IsDateString()
+  @IsYYYYMMDD()
   date: string;
 
   @ApiProperty({ example: 1 })
