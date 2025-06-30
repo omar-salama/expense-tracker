@@ -1,5 +1,5 @@
 import { IsString, IsNumber, IsEnum, IsDateString, IsInt } from 'class-validator';
-import { ExpenseCategory } from '../expense.entity';
+import { ExpenseCategory } from '../../enums/expense-category.enum';
 
 export class CreateExpenseDto {
   @IsString()

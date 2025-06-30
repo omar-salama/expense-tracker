@@ -1,11 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
-export enum ExpenseCategory {
-  FOOD = 'Food',
-  TRANSPORT = 'Transport',
-  BILLS = 'Bills',
-  OTHER = 'Other',
-}
+import { ExpenseCategory } from '../enums/expense-category.enum';
 
 @Entity({ name: 'expenses' })
 export class Expense {
