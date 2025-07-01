@@ -23,6 +23,8 @@ import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './expense.entity';
 import { ExpensesService } from './expenses.service';
+import { RequestUser } from '../auth/decorators/request-user.decorator';
+import { RequestUserDto } from '../auth/dto/request-user.dto';
 
 @ApiExtraModels(ApiResponseDto, ApiPaginatedResponseDto, Expense)
 @UseGuards(AuthGuard('jwt'))
@@ -34,25 +36,32 @@ export class ExpensesController {
   @ApiMessage('Expense created successfully')
   @ApiSuccessResponse(Expense)
   @ApiBody({ type: CreateExpenseDto })
-  async create(@Body() createExpenseDto: CreateExpenseDto): Promise<Expense> {
-    return this.expensesService.create(createExpenseDto);
+  async create(
+    @RequestUser() user: RequestUserDto,
+    @Body() createExpenseDto: CreateExpenseDto,
+  ): Promise<Expense> {
+    return this.expensesService.create(createExpenseDto, user.id);
   }
 
   @Get()
   @ApiMessage('Expenses fetched successfully')
   @ApiSuccessResponse([Expense], 200, { withMetaData: true })
-  findAllPaginated(
+  async findAllPaginated(
+    @RequestUser() user: RequestUserDto,
     @Query() paginationQuery: PaginationQueryDto,
   ): Promise<PaginatedData<Expense[]>> {
-    return this.expensesService.findAllPaginated(paginationQuery);
+    return this.expensesService.findAllPaginated(paginationQuery, user.id);
   }
 
   @Get(':id')
   @ApiMessage('Expense fetched successfully')
   @ApiParam({ name: 'id', type: Number })
   @ApiSuccessResponse(Expense, 200)
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<Expense> {
-    return this.expensesService.findOne(id);
+  async findOne(
+    @RequestUser() user: RequestUserDto,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Expense> {
+    return this.expensesService.findOneById(id, user.id);
   }
 
   @Put(':id')
@@ -60,11 +69,16 @@ export class ExpensesController {
   @ApiParam({ name: 'id', type: Number })
   @ApiSuccessResponse(Expense, 200)
   @ApiBody({ type: UpdateExpenseDto })
-  update(
+  async update(
+    @RequestUser() user: RequestUserDto,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateExpenseDto: UpdateExpenseDto,
   ): Promise<Expense> {
-    return this.expensesService.update(id, updateExpenseDto);
+    return this.expensesService.updateOneById(
+      id,
+      user.id,
+      updateExpenseDto,
+    );
   }
 
   @Delete(':id')
@@ -73,9 +87,10 @@ export class ExpensesController {
   @ApiSuccessResponse(Expense, 200)
   @HttpCode(200)
   async remove(
+    @RequestUser() user: RequestUserDto,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<{ message: string }> {
-    await this.expensesService.remove(id);
+    await this.expensesService.removeOneById(id, user.id);
     return { message: 'Expense deleted successfully' };
   }
 }

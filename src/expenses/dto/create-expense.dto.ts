@@ -24,8 +24,4 @@ export class CreateExpenseDto {
   @ApiProperty({ example: '2025-06-30' })
   @IsYYYYMMDD()
   date: string;
-
-  @ApiProperty({ example: 1 })
-  @IsInt()
-  userId: number;
 }
