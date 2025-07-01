@@ -9,7 +9,9 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiExtraModels, ApiParam } from '@nestjs/swagger';
 import { ApiPaginatedResponseDto } from '../common/api-paginated-response.dto';
 import { ApiResponseDto } from '../common/api-response.dto';
@@ -23,6 +25,7 @@ import { Expense } from './expense.entity';
 import { ExpensesService } from './expenses.service';
 
 @ApiExtraModels(ApiResponseDto, ApiPaginatedResponseDto, Expense)
+@UseGuards(AuthGuard('jwt'))
 @Controller('expenses')
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
