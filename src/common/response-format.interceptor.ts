@@ -23,17 +23,9 @@ export class ResponseFormatInterceptor<T> implements NestInterceptor<T, any> {
       this.reflector.get<string>(RESPONSE_MESSAGE_KEY, handler);
     return next.handle().pipe(
       map((data) => {
-        if (
-          data &&
-          typeof data === 'object' &&
-          'data' in data &&
-          'message' in data &&
-          'status' in data
-        ) {
-          return data;
-        }
         return {
-          data,
+          data: data?.data ?? data,
+          meta: data?.meta,
           message,
           status: status <= 400 ? 'success' : 'error',
         };
