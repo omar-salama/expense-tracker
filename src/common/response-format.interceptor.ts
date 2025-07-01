@@ -20,8 +20,7 @@ export class ResponseFormatInterceptor<T> implements NestInterceptor<T, any> {
     const status = response.statusCode;
     const handler = context.getHandler();
     const message =
-      this.reflector.get<string>(RESPONSE_MESSAGE_KEY, handler) ||
-      'success';
+      this.reflector.get<string>(RESPONSE_MESSAGE_KEY, handler);
     return next.handle().pipe(
       map((data) => {
         if (
