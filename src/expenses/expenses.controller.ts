@@ -11,6 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBody, ApiExtraModels, ApiParam } from '@nestjs/swagger';
+import { ApiPaginatedResponseDto } from '../common/api-paginated-response.dto';
 import { ApiResponseDto } from '../common/api-response.dto';
 import { ApiMessage } from '../common/decorators/api-message.decorator';
 import { ApiSuccessResponse } from '../common/decorators/api-success-response.decorator';
@@ -21,7 +22,7 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './expense.entity';
 import { ExpensesService } from './expenses.service';
 
-@ApiExtraModels(ApiResponseDto, Expense)
+@ApiExtraModels(ApiResponseDto, ApiPaginatedResponseDto, Expense)
 @Controller('expenses')
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
