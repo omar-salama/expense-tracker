@@ -10,9 +10,10 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.entity';
 import { instanceToPlain } from 'class-transformer';
+import { IUserLookupService } from '../auth/interfaces/user-lookup.interface';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements IUserLookupService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -25,9 +26,9 @@ export class UsersService {
     return instanceToPlain(savedUser);
   }
 
-  async findOneById(id: number): Promise<User> {
+  async findOneById(id: number): Promise<User | null> {
     const user = await this.userRepository.findOneBy({ id });
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) return null;
     return user;
   }
 
@@ -37,11 +38,15 @@ export class UsersService {
 
   async changePassword(id: number, dto: ChangePasswordDto): Promise<any> {
     const user = await this.findOneById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     const isMatch = await bcrypt.compare(dto.currentPassword, user.password);
     if (!isMatch) {
       throw new BadRequestException('Current password is incorrect');
     }
     user.password = await bcrypt.hash(dto.newPassword, 10);
-    await this.userRepository.save(user);
+    const updatedUser = await this.userRepository.save(user);
+    return instanceToPlain(updatedUser);
   }
 }

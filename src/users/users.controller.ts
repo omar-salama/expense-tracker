@@ -29,13 +29,6 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Get(':id')
-  @ApiSuccessResponse(User, 200)
-  @ApiParam({ name: 'id', type: Number })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.usersService.findOneById(id);
-  }
-
   @Put(':id/change-password')
   @ApiMessage('Password changed successfully')
   @ApiSuccessResponse(undefined, 200)
