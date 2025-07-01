@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { ExpensesModule } from './expenses/expenses.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ExpensesModule } from './expenses/expenses.module';
       useFactory: typeOrmConfig,
     }),
     ExpensesModule,
+    UsersModule,
   ],
 })
 export class AppModule {}

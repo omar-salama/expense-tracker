@@ -4,20 +4,21 @@ import { ApiResponseDto } from '../api-response.dto';
 import { ApiPaginatedResponseDto } from '../api-paginated-response.dto';
 
 export function ApiSuccessResponse(
-  dataType: Type<unknown> | [Type<unknown>],
+  dataType?: Type<unknown> | [Type<unknown>],
   status = 200,
-  options: { withMetaData: boolean } = { withMetaData: false },
+  options: { withMetaData?: boolean } = {},
 ) {
-  const dataSchema = Array.isArray(dataType)
-    ? { type: 'array', items: { $ref: getSchemaPath(dataType[0]) } }
-    : { $ref: getSchemaPath(dataType as Type<unknown>) };
-
   const properties: Record<string, any> = {
-    data: dataSchema,
     message: { type: 'string' },
-    status: { type: 'number' },
+    status: { type: 'string', example: 'success' },
   };
-  let responseDtoRef = getSchemaPath(ApiResponseDto);
+
+  if (dataType) {
+    properties.data = Array.isArray(dataType)
+      ? { type: 'array', items: { $ref: getSchemaPath(dataType[0]) } }
+      : { $ref: getSchemaPath(dataType as Type<unknown>) };
+  }
+
   if (options.withMetaData) {
     properties.meta = {
       type: 'object',
@@ -27,14 +28,13 @@ export function ApiSuccessResponse(
         total: { type: 'number', example: 100 },
       },
     };
-    responseDtoRef = getSchemaPath(ApiPaginatedResponseDto);
   }
 
   return applyDecorators(
     ApiResponse({
       status,
       schema: {
-        allOf: [{ $ref: responseDtoRef }, { properties }],
+        properties,
       },
     }),
   );
