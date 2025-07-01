@@ -36,7 +36,7 @@ export class ResponseFormatInterceptor<T> implements NestInterceptor<T, any> {
         return {
           data,
           message,
-          status,
+          status: status <= 400 ? 'success' : 'error',
         };
       }),
     );

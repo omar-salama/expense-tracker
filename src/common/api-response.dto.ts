@@ -7,6 +7,6 @@ export class ApiResponseDto<T> {
   @ApiProperty()
   message: string;
 
-  @ApiProperty()
-  status: number;
+  @ApiProperty({ example: 'success' })
+  status: string;
 } 
