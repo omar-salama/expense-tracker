@@ -86,6 +86,6 @@ export class ExpensesController {
     @RequestUser() user: RequestUserDto,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    this.expensesService.removeOneById(id, user.id);
+    return this.expensesService.removeOneById(id, user.id);
   }
 }
