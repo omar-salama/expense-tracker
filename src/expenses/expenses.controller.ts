@@ -36,7 +36,7 @@ export class ExpensesController {
   @ApiMessage('Expense created successfully')
   @ApiSuccessResponse(Expense)
   @ApiBody({ type: CreateExpenseDto })
-  async create(
+  create(
     @RequestUser() user: RequestUserDto,
     @Body() createExpenseDto: CreateExpenseDto,
   ): Promise<Expense> {
@@ -46,7 +46,7 @@ export class ExpensesController {
   @Get()
   @ApiMessage('Expenses fetched successfully')
   @ApiSuccessResponse([Expense], 200, { withMetaData: true })
-  async findAllPaginated(
+  findAllPaginated(
     @RequestUser() user: RequestUserDto,
     @Query() paginationQuery: PaginationQueryDto,
   ): Promise<PaginatedData<Expense[]>> {
@@ -57,7 +57,7 @@ export class ExpensesController {
   @ApiMessage('Expense fetched successfully')
   @ApiParam({ name: 'id', type: Number })
   @ApiSuccessResponse(Expense, 200)
-  async findOne(
+  findOne(
     @RequestUser() user: RequestUserDto,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Expense> {
@@ -69,16 +69,12 @@ export class ExpensesController {
   @ApiParam({ name: 'id', type: Number })
   @ApiSuccessResponse(Expense, 200)
   @ApiBody({ type: UpdateExpenseDto })
-  async update(
+  update(
     @RequestUser() user: RequestUserDto,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateExpenseDto: UpdateExpenseDto,
   ): Promise<Expense> {
-    return this.expensesService.updateOneById(
-      id,
-      user.id,
-      updateExpenseDto,
-    );
+    return this.expensesService.updateOneById(id, user.id, updateExpenseDto);
   }
 
   @Delete(':id')
@@ -86,11 +82,10 @@ export class ExpensesController {
   @ApiParam({ name: 'id', type: Number })
   @ApiSuccessResponse(Expense, 200)
   @HttpCode(200)
-  async remove(
+  remove(
     @RequestUser() user: RequestUserDto,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<{ message: string }> {
-    await this.expensesService.removeOneById(id, user.id);
-    return { message: 'Expense deleted successfully' };
+  ) {
+    this.expensesService.removeOneById(id, user.id);
   }
 }
