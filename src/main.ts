@@ -2,8 +2,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { ResponseFormatInterceptor } from './common/response-format.interceptor';
 import { GlobalExceptionFilter } from './common/global-exception.filter';
+import { ResponseFormatInterceptor } from './common/response-format.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +17,8 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Expense Tracker API')
     .setVersion('1.0')
+    .addBearerAuth({ type: 'http' }, 'Bearer')
+    .addSecurityRequirements('Bearer')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document, { useGlobalPrefix: true });
