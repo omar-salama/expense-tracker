@@ -3,24 +3,23 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Post,
   Put,
-  HttpCode,
+  Query,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiParam,
-  ApiExtraModels,
-} from '@nestjs/swagger';
+import { ApiBody, ApiExtraModels, ApiParam } from '@nestjs/swagger';
+import { ApiResponseDto } from '../common/api-response.dto';
+import { ApiMessage } from '../common/decorators/api-message.decorator';
+import { ApiSuccessResponse } from '../common/decorators/api-success-response.decorator';
+import { PaginatedData } from '../common/paginated-data.dto';
 import { CreateExpenseDto } from './dto/create-expense.dto';
+import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './expense.entity';
 import { ExpensesService } from './expenses.service';
-import { ApiMessage } from '../common/decorators/api-message.decorator';
-import { ApiResponseDto } from '../common/api-response.dto';
-import { ApiResponseWithData } from '../common/decorators/api-response-with-data.decorator';
 
 @ApiExtraModels(ApiResponseDto, Expense)
 @Controller('expenses')
@@ -29,7 +28,7 @@ export class ExpensesController {
 
   @Post()
   @ApiMessage('Expense created successfully')
-  @ApiResponseWithData(Expense, 201)
+  @ApiSuccessResponse(Expense)
   @ApiBody({ type: CreateExpenseDto })
   async create(@Body() createExpenseDto: CreateExpenseDto): Promise<Expense> {
     return this.expensesService.create(createExpenseDto);
@@ -37,15 +36,17 @@ export class ExpensesController {
 
   @Get()
   @ApiMessage('Expenses fetched successfully')
-  @ApiResponseWithData([Expense], 200)
-  findAll(): Promise<Expense[]> {
-    return this.expensesService.findAll();
+  @ApiSuccessResponse([Expense], 200, { withMetaData: true })
+  findAllPaginated(
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedData<Expense[]>> {
+    return this.expensesService.findAllPaginated(paginationQuery);
   }
 
   @Get(':id')
   @ApiMessage('Expense fetched successfully')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponseWithData(Expense, 200)
+  @ApiSuccessResponse(Expense, 200)
   findOne(@Param('id', ParseIntPipe) id: number): Promise<Expense> {
     return this.expensesService.findOne(id);
   }
@@ -53,7 +54,7 @@ export class ExpensesController {
   @Put(':id')
   @ApiMessage('Expense updated successfully')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponseWithData(Expense, 200)
+  @ApiSuccessResponse(Expense, 200)
   @ApiBody({ type: UpdateExpenseDto })
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -65,7 +66,7 @@ export class ExpensesController {
   @Delete(':id')
   @ApiMessage('Expense deleted successfully')
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponseWithData(Expense, 200)
+  @ApiSuccessResponse(Expense, 200)
   @HttpCode(200)
   async remove(
     @Param('id', ParseIntPipe) id: number,

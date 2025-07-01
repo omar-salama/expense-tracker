@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginatedData } from '../common/paginated-data.dto';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './expense.entity';
+import { PaginationQueryDto } from './dto/pagination-query.dto';
 
 @Injectable()
 export class ExpensesService {
@@ -17,8 +19,23 @@ export class ExpensesService {
     return this.expenseRepository.save(expense);
   }
 
-  async findAll(): Promise<Expense[]> {
-    return this.expenseRepository.find();
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedData<Expense[]>> {
+    const { page, limit } = paginationQuery;
+    const queryBuilder = this.expenseRepository.createQueryBuilder('expense');
+    queryBuilder.orderBy('expense.date', 'DESC');
+      queryBuilder.skip((page - 1) * limit).take(limit);
+
+    const [expenses, total] = await queryBuilder.getManyAndCount();
+    return {
+      data: expenses,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
   }
 
   async findOne(id: number): Promise<Expense> {
