@@ -13,18 +13,21 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiExtraModels, ApiParam } from '@nestjs/swagger';
+import { RequestUser } from '../auth/decorators/request-user.decorator';
+import { RequestUserDto } from '../auth/dto/request-user.dto';
 import { ApiPaginatedResponseDto } from '../common/api-paginated-response.dto';
 import { ApiResponseDto } from '../common/api-response.dto';
 import { ApiMessage } from '../common/decorators/api-message.decorator';
 import { ApiSuccessResponse } from '../common/decorators/api-success-response.decorator';
 import { PaginatedData } from '../common/paginated-data.dto';
 import { CreateExpenseDto } from './dto/create-expense.dto';
+import {
+  ExpenseFilterDto
+} from './dto/expense-filter.dto';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './expense.entity';
 import { ExpensesService } from './expenses.service';
-import { RequestUser } from '../auth/decorators/request-user.decorator';
-import { RequestUserDto } from '../auth/dto/request-user.dto';
 
 @ApiExtraModels(ApiResponseDto, ApiPaginatedResponseDto, Expense)
 @UseGuards(AuthGuard('jwt'))
@@ -49,8 +52,13 @@ export class ExpensesController {
   findAllPaginated(
     @RequestUser() user: RequestUserDto,
     @Query() paginationQuery: PaginationQueryDto,
+    @Query() filterQuery: ExpenseFilterDto,
   ): Promise<PaginatedData<Expense[]>> {
-    return this.expensesService.findAllPaginated(paginationQuery, user.id);
+    return this.expensesService.findAllPaginated(
+      paginationQuery,
+      filterQuery,
+      user.id,
+    );
   }
 
   @Get(':id')
