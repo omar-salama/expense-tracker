@@ -28,6 +28,8 @@ import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './expense.entity';
 import { ExpensesService } from './expenses.service';
+import { ExpenseReportQueryDto } from './dto/expense-report-query.dto';
+import { ExpenseSummaryReportDto } from './dto/expense-summary-report.dto';
 
 @ApiExtraModels(ApiResponseDto, ApiPaginatedResponseDto, Expense)
 @UseGuards(AuthGuard('jwt'))
@@ -95,5 +97,15 @@ export class ExpensesController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.expensesService.removeOneById(id, user.id);
+  }
+
+  @Get('reports/summary')
+  @ApiMessage('Summary report fetched successfully')
+  @ApiSuccessResponse(ExpenseSummaryReportDto, 200)
+  async getSummaryReport(
+    @RequestUser() user: RequestUserDto,
+    @Query() query: ExpenseReportQueryDto,
+  ): Promise<ExpenseSummaryReportDto> {
+    return this.expensesService.getSummaryReport(user.id, query.startDate, query.endDate);
   }
 }

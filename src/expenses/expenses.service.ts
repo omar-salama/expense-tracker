@@ -4,6 +4,11 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { PaginatedData } from '../common/paginated-data.dto';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { ExpenseFilterDto } from './dto/expense-filter.dto';
+import {
+  ExpenseSummaryMonthlyDto,
+  ExpenseSummaryPerCategoryDto,
+  ExpenseSummaryReportDto,
+} from './dto/expense-summary-report.dto';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { SortField } from './enums/sort-field.enum';
@@ -99,6 +104,70 @@ export class ExpensesService {
     if (result.affected === 0) throw new NotFoundException('Expense not found');
   }
 
+  async getSummaryReport(
+    userId: number,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<ExpenseSummaryReportDto> {
+    const queryBuilder = this.expenseRepository.createQueryBuilder('expense');
+    queryBuilder.where('expense.userId = :userId', { userId });
+
+    this.filterByDate(queryBuilder, startDate, endDate);
+
+    const expenses = await queryBuilder.getMany();
+
+    const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+
+    const perCategoryExpenses = this.getPerCategoryExpenses(expenses);
+
+    const monthlyExpenses = this.getMonthlyExpenses(expenses);
+
+    return {
+      total,
+      perCategory: perCategoryExpenses,
+      monthly: monthlyExpenses,
+    };
+  }
+
+  private getPerCategoryExpenses(
+    expenses: Expense[],
+  ): ExpenseSummaryPerCategoryDto[] {
+    const perCategory: Record<string, number> = {};
+    for (const e of expenses) {
+      perCategory[e.category] =
+        (perCategory[e.category] || 0) + Number(e.amount);
+    }
+    return Object.entries(perCategory).map(([category, total]) => ({
+      category,
+      total,
+    }));
+  }
+
+  private getMonthlyExpenses(expenses: Expense[]): ExpenseSummaryMonthlyDto[] {
+    const monthly: Record<string, number> = {};
+    for (const e of expenses) {
+      const month = e.date.slice(0, 7);
+      monthly[month] = (monthly[month] || 0) + Number(e.amount);
+    }
+    return Object.entries(monthly).map(([month, total]) => ({
+      month,
+      total,
+    }));
+  }
+
+  private filterByDate(
+    queryBuilder: SelectQueryBuilder<Expense>,
+    startDate?: string,
+    endDate?: string,
+  ) {
+    if (startDate) {
+      queryBuilder.andWhere('expense.date >= :startDate', { startDate });
+    }
+    if (endDate) {
+      queryBuilder.andWhere('expense.date <= :endDate', { endDate });
+    }
+  }
+
   private applyExpenseFilters(
     queryBuilder: SelectQueryBuilder<Expense>,
     filters: ExpenseFilterDto,
@@ -120,11 +189,7 @@ export class ExpensesService {
     if (maxAmount !== undefined) {
       queryBuilder.andWhere('expense.amount <= :maxAmount', { maxAmount });
     }
-    if (startDate) {
-      queryBuilder.andWhere('expense.date >= :startDate', { startDate });
-    }
-    if (endDate) {
-      queryBuilder.andWhere('expense.date <= :endDate', { endDate });
-    }
+
+    this.filterByDate(queryBuilder, startDate, endDate);
   }
 }
